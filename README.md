@@ -5,7 +5,7 @@ Create an application which consists of these screens:<br />
     1) Main screen:<br />
 Screen shows list of posts (titles only), has pull to refresh, displays refreshing state if posts are being loaded. On item click, Single post details screen should be opened.<br />
 
-    2) Single post details screen<br />
+    2) Single post details screen <br />
 Screen should have User’s name and rounded photo, Post title and body;<br />
 
 Data should be stored in database, initially loaded from database and refreshed from API. <br />
