@@ -81,7 +81,7 @@ private lateinit var  viewModel: MainViewModel
                 tmpPostList = response.body() as ArrayList<Post>
 
                 for(p in tmpPostList){
-                    var postEntity : PostEntity = PostEntity(p.userId.toInt(), p.id, p.title, p.body)
+                      var postEntity : PostEntity = PostEntity(p.id.toInt(), p.id, p.title, p.body)
 
                     postViewModel.addPost(postEntity)
                 }
