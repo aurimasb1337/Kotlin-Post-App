@@ -31,18 +31,72 @@ class MainActivity : AppCompatActivity() {
 
 private lateinit var  viewModel: MainViewModel
     private lateinit var  postViewModel: PostViewModel
-
+    private var  postList = ArrayList<Post>()
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
         setContentView(R.layout.activity_main)
-
-
-            evaluteConnection()
         postViewModel= ViewModelProvider(this).get(PostViewModel::class.java)
+        readSavedData()
+            evaluteConnection()
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        val layoutManager = LinearLayoutManager(applicationContext)
+        recyclerView.layoutManager = layoutManager
     }
+
+
+
+    private fun readSavedData(){
+        postList = ArrayList<Post>()
+
+
+        postViewModel.readAllData.observe(this, Observer {
+                post ->
+            for(p in post){
+                var tmppost : Post = Post(p.userId.toString(), p.id, p.title, p.body)
+                postList.add(tmppost)
+
+                val obj_adapter = CustomAdapter(postList)
+                recyclerView.adapter = obj_adapter
+            }
+
+        })
+
+    }
+
+    private fun callApi() {
+        val repository = Repository()
+        val viewModelFactory = MainViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+        viewModel.getPosts()
+        viewModel.myPosts.observe(this, Observer { response ->
+            if(response.isSuccessful){
+                // Log.d("Response", response.body().toString())
+
+
+                var tmpPostList = ArrayList<Post>()
+
+                tmpPostList = response.body() as ArrayList<Post>
+
+                for(p in tmpPostList){
+                    var postEntity : PostEntity = PostEntity(p.userId.toInt(), p.id, p.title, p.body)
+
+                    postViewModel.addPost(postEntity)
+                }
+                val obj_adapter = CustomAdapter(tmpPostList)
+                recyclerView.adapter = obj_adapter
+
+
+
+
+            }
+        })
+
+    }
+
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun evaluteConnection() {
@@ -58,7 +112,7 @@ private lateinit var  viewModel: MainViewModel
                callApi();
                refreshLayout.isRefreshing = false
            }
-           callApi()
+       callApi()
        }
     }
 
@@ -109,37 +163,7 @@ private lateinit var  viewModel: MainViewModel
         return false
     }
 
-    private fun callApi() {
-        val repository = Repository()
-        val viewModelFactory = MainViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-        viewModel.getPosts()
-        viewModel.myPosts.observe(this, Observer { response ->
-            if(response.isSuccessful){
-               // Log.d("Response", response.body().toString())
 
-
-                var PostList = ArrayList<Post>()
-                var PostEntityList = ArrayList<PostEntity>()
-                PostList = response.body() as ArrayList<Post>
-                PostEntityList = response.body() as ArrayList<PostEntity>
-//                for(p in PostEntityList){
-
-                 // postViewModel.addPost(p)
-          //      }
-                val obj_adapter = CustomAdapter(PostList)
-                val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-                val layoutManager = LinearLayoutManager(applicationContext)
-                recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = obj_adapter
-
-
-
-
-            }
-        })
-
-    }
 
 
 }
